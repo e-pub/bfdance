@@ -1,5 +1,6 @@
 {
   "name": "bfdance",
+  "homepage": "https://e-pub.gitlab.io/bfdance",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
