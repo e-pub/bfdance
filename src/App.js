@@ -16,6 +16,8 @@ import ScrollToTop from "./components/ScrollToTop";
 import "./style.css";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./Assets/css/style-custom-25.css";
+import "./Assets/css/calendar.css";
 
 function App() {
   const [load, upadateLoad] = useState(true);
