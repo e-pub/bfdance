@@ -1,6 +1,6 @@
 {
+  "homepage": "https://e-pub.github.io/bfdance/",
   "name": "bfdance",
-  "homepage": "/bfdance",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
