@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import axios from "axios";  // axios import 추가
-import "Assets/css/style-custom-25.css";  // 경로 확인
+import axios from "axios"; 
+import "Assets/css/style-custom-25.css"; 
 
 const GITHUB_API_BASE = "https://api.github.com/repos";
-const GITHUB_REPO = "your-username/your-repo";  // 자신의 GitHub 저장소 경로
-const TOKEN = "YOUR_GITHUB_TOKEN";  // GitHub Personal Access Token
+const GITHUB_REPO = "my-username/my-repo";  // 실제 GitHub 저장소 경로로 변경 (예: "john-doe/my-awesome-project")
+const TOKEN = "ghp_xxxxxxx";  // GitHub Personal Access Token
+
 
 const MembershipRequest = ({ closePopup }) => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
+    phone: "",
     role: "admin",
   });
 
@@ -20,8 +22,31 @@ const MembershipRequest = ({ closePopup }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleValidation = () => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phonePattern = /^(\d{3})-(\d{3,4})-(\d{4})$/;  // 010-XXX-XXXX 또는 010-XXXX-XXXX 형식 지원
+  
+    if (!formData.username) {
+      alert("Username is required.");
+      return false;
+    }
+    if (!emailPattern.test(formData.email)) {
+      alert("Invalid email format.");
+      return false;
+    }
+    if (!phonePattern.test(formData.phone)) {
+      alert("Invalid phone number. Use the format 010-XXXX-XXXX.");
+      return false;
+    }
+    return true;
+  };
+  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!handleValidation()) return;
+
     setIsSubmitting(true);
 
     try {
@@ -44,7 +69,7 @@ const MembershipRequest = ({ closePopup }) => {
       );
 
       alert("Your membership request has been submitted!");
-      setFormData({ username: "", email: "", role: "admin" });
+      setFormData({ username: "", email: "", phone: "", role: "admin" });
     } catch (error) {
       console.error("Failed to submit request:", error);
       alert("Failed to submit your request. Please try again later.");
@@ -76,6 +101,17 @@ const MembershipRequest = ({ closePopup }) => {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              required
+            />
+          </label>
+          <label>
+            Phone:
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="123-456-7890"
               required
             />
           </label>

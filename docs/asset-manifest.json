@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/bfdance/static/css/main.02e98570.css",
-    "main.js": "/bfdance/static/js/main.5bfb1002.js",
+    "main.css": "/bfdance/static/css/main.7f9eed08.css",
+    "main.js": "/bfdance/static/js/main.9f9065da.js",
     "static/js/415.2657dda3.chunk.js": "/bfdance/static/js/415.2657dda3.chunk.js",
     "static/js/787.ffe4d437.chunk.js": "/bfdance/static/js/787.ffe4d437.chunk.js",
     "static/media/leaf.png": "/bfdance/static/media/leaf.ff2616f664c8c0ceab91.png",
@@ -17,13 +17,13 @@
     "static/media/avatar.svg": "/bfdance/static/media/avatar.5852f40fbb38aa284829fa3fb7722225.svg",
     "static/media/pre.svg": "/bfdance/static/media/pre.d4812f51c8c80976eaab.svg",
     "index.html": "/bfdance/index.html",
-    "main.02e98570.css.map": "/bfdance/static/css/main.02e98570.css.map",
-    "main.5bfb1002.js.map": "/bfdance/static/js/main.5bfb1002.js.map",
+    "main.7f9eed08.css.map": "/bfdance/static/css/main.7f9eed08.css.map",
+    "main.9f9065da.js.map": "/bfdance/static/js/main.9f9065da.js.map",
     "415.2657dda3.chunk.js.map": "/bfdance/static/js/415.2657dda3.chunk.js.map",
     "787.ffe4d437.chunk.js.map": "/bfdance/static/js/787.ffe4d437.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.02e98570.css",
-    "static/js/main.5bfb1002.js"
+    "static/css/main.7f9eed08.css",
+    "static/js/main.9f9065da.js"
   ]
 }

@@ -1,62 +1,88 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";  // axios 추가
 import "../../Assets/css/calendar.css";
 
-const monthNames = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-];
+const GITHUB_API_BASE = "https://api.github.com/repos";
+const GITHUB_REPO = "your-username/your-repo";  // GitHub 저장소 경로로 수정
+const TOKEN = "YOUR_GITHUB_TOKEN";  // Personal Access Token 입력
 
 const Calendar = () => {
   const [calendarData, setCalendarData] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
-  const [showPopup, setShowPopup] = useState(false);
   const [newEvent, setNewEvent] = useState({ title: "", link: "" });
-  const [isAdmin] = useState(() => localStorage.getItem("isAdmin") === "true");  // 그대로 유지
+  const [showPopup, setShowPopup] = useState(false);
 
-  // 데이터 로드
+  // GitHub에서 calendar.json 데이터 로드
   useEffect(() => {
     const loadCalendarData = async () => {
       try {
-        const response = await fetch(`${process.env.PUBLIC_URL}/date/calendar.json`);
-        if (!response.ok) {
-          throw new Error(`Failed to load calendar data: ${response.status}`);
-        }
-        const data = await response.json();
+        const response = await axios.get(
+          `${GITHUB_API_BASE}/${GITHUB_REPO}/contents/data/calendar.json`,
+          { headers: { Authorization: `token ${TOKEN}` } }
+        );
+        const data = JSON.parse(atob(response.data.content));  // Base64 디코딩
         setCalendarData(data);
       } catch (error) {
-        console.error("Error loading calendar data:", error);
+        console.error("Failed to load calendar data:", error);
       }
     };
     loadCalendarData();
   }, []);
 
-  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+  // 이전 달로 이동
+  const handlePrevMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  };
 
+  // 다음 달로 이동
+  const handleNextMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  };
+
+  // 날짜 클릭 이벤트
   const handleDateClick = (date) => {
     const existingEvent = calendarData.find((item) => item.date === date);
     setSelectedDate({ date, ...existingEvent });
     setShowPopup(true);
   };
 
-  const handlePrevMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-  };
-
-  const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-  };
-
+  // 입력 필드 변경
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewEvent((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSaveEvent = () => {
+  // 이벤트 저장 (GitHub API로 업데이트)
+  const handleSaveEvent = async () => {
     const updatedEvent = { date: selectedDate.date, ...newEvent };
     const updatedData = calendarData.filter((item) => item.date !== selectedDate.date);
-    setCalendarData([...updatedData, updatedEvent]);
-    setShowPopup(false);
+    const newCalendarData = [...updatedData, updatedEvent];
+
+    try {
+      const response = await axios.get(
+        `${GITHUB_API_BASE}/${GITHUB_REPO}/contents/data/calendar.json`,
+        { headers: { Authorization: `token ${TOKEN}` } }
+      );
+      const sha = response.data.sha;
+
+      await axios.put(
+        `${GITHUB_API_BASE}/${GITHUB_REPO}/contents/data/calendar.json`,
+        {
+          message: "Update calendar event",
+          content: btoa(JSON.stringify(newCalendarData, null, 2)),  // Base64 인코딩
+          sha: sha,
+        },
+        { headers: { Authorization: `token ${TOKEN}` } }
+      );
+
+      setCalendarData(newCalendarData);
+      setShowPopup(false);
+      alert("Event saved successfully!");
+    } catch (error) {
+      console.error("Failed to update calendar data:", error);
+      alert("Failed to save event.");
+    }
   };
 
   const closePopup = () => {
@@ -64,20 +90,20 @@ const Calendar = () => {
     setSelectedDate(null);
   };
 
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+
   return (
     <div className="wrapper-calendar">
       <div className="calendar-container">
         <div className="calendar-header">
           <button onClick={handlePrevMonth}>◀</button>
-          <h2>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</h2>
+          <h2>{currentDate.toLocaleString("default", { month: "long" })} {currentDate.getFullYear()}</h2>
           <button onClick={handleNextMonth}>▶</button>
         </div>
-
         <div className="calendar-grid">
           {Array.from({ length: daysInMonth }).map((_, index) => {
             const date = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(index + 1).padStart(2, "0")}`;
             const event = calendarData.find((item) => item.date === date);
-
             return (
               <div
                 key={date}
@@ -90,40 +116,17 @@ const Calendar = () => {
             );
           })}
         </div>
-
         {showPopup && (
           <div className="popup">
             <div className="popup-content">
               <h3>{selectedDate?.title || "New Event"}</h3>
-              {isAdmin ? (
-                <div className="admin-input-form">
-                  <label>Event Title</label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={newEvent.title}
-                    onChange={handleInputChange}
-                  />
-                  <label>YouTube Link</label>
-                  <input
-                    type="text"
-                    name="link"
-                    value={newEvent.link}
-                    onChange={handleInputChange}
-                  />
-                  <button onClick={handleSaveEvent}>Save Event</button>
-                </div>
-              ) : (
-                selectedDate?.link && (
-                  <iframe
-                    src={selectedDate.link.replace("watch?v=", "embed/")}
-                    title={selectedDate.title}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                )
-              )}
+              <div className="admin-input-form">
+                <label>Event Title</label>
+                <input type="text" name="title" value={newEvent.title} onChange={handleInputChange} />
+                <label>YouTube Link</label>
+                <input type="text" name="link" value={newEvent.link} onChange={handleInputChange} />
+                <button onClick={handleSaveEvent}>Save Event</button>
+              </div>
               <button onClick={closePopup}>Close</button>
             </div>
           </div>
