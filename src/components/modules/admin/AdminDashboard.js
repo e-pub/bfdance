@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios"; 
+import axios from "axios";
+import "./AdminDashboard.css"; // 팝업 스타일
 
 const GITHUB_API_BASE = "https://api.github.com/repos";
-const GITHUB_REPO = "your-username/your-repo";  // 실제 GitHub 저장소 경로
-const TOKEN = "YOUR_GITHUB_TOKEN";  // GitHub Personal Access Token
+const GITHUB_REPO = "your-username/your-repo"; // 실제 GitHub 저장소 경로
+const TOKEN = "YOUR_GITHUB_TOKEN"; // GitHub Personal Access Token
 
 const AdminDashboard = () => {
   const [pendingList, setPendingList] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchPendingList();
   }, []);
 
   const fetchPendingList = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(
         `${GITHUB_API_BASE}/${GITHUB_REPO}/contents/data/pendingList.json`,
@@ -23,14 +26,31 @@ const AdminDashboard = () => {
       setPendingList(data);
     } catch (error) {
       console.error("Failed to fetch pending list:", error.response || error);
+      alert("Failed to load pending approvals. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateGitHubFile = async (filePath, content, sha) => {
+    try {
+      await axios.put(
+        `${GITHUB_API_BASE}/${GITHUB_REPO}/contents/${filePath}`,
+        {
+          message: `Update ${filePath}`,
+          content: btoa(JSON.stringify(content, null, 2)),
+          sha: sha,
+        },
+        { headers: { Authorization: `token ${TOKEN}` } }
+      );
+    } catch (error) {
+      console.error(`Failed to update ${filePath}:`, error.response || error);
+      throw new Error("Failed to update file");
     }
   };
 
   const approveUser = async (user) => {
     try {
-      console.log("Approving user:", user);
-
-      // AdminList.json 업데이트
       const AdminListResponse = await axios.get(
         `${GITHUB_API_BASE}/${GITHUB_REPO}/contents/data/AdminList.json`,
         { headers: { Authorization: `token ${TOKEN}` } }
@@ -40,7 +60,6 @@ const AdminDashboard = () => {
 
       await updateGitHubFile("data/AdminList.json", AdminList, AdminListResponse.data.sha);
 
-      // pendingList.json 업데이트
       const pendingListResponse = await axios.get(
         `${GITHUB_API_BASE}/${GITHUB_REPO}/contents/data/pendingList.json`,
         { headers: { Authorization: `token ${TOKEN}` } }
@@ -60,15 +79,14 @@ const AdminDashboard = () => {
 
   const rejectUser = async (username) => {
     try {
-      console.log("Rejecting user:", username);
-      const updatedPendingList = pendingList.filter((user) => user.username !== username);
-      setPendingList(updatedPendingList);
-
-      const response = await axios.get(
+      const pendingListResponse = await axios.get(
         `${GITHUB_API_BASE}/${GITHUB_REPO}/contents/data/pendingList.json`,
         { headers: { Authorization: `token ${TOKEN}` } }
       );
-      await updateGitHubFile("data/pendingList.json", updatedPendingList, response.data.sha);
+      const updatedPendingList = pendingList.filter((user) => user.username !== username);
+      setPendingList(updatedPendingList);
+
+      await updateGitHubFile("data/pendingList.json", updatedPendingList, pendingListResponse.data.sha);
 
       alert(`${username} has been rejected.`);
       setSelectedUser(null);
@@ -78,27 +96,14 @@ const AdminDashboard = () => {
     }
   };
 
-  const updateGitHubFile = async (filePath, content, sha) => {
-    try {
-      await axios.put(
-        `${GITHUB_API_BASE}/${GITHUB_REPO}/contents/${filePath}`,
-        {
-          message: `Update ${filePath}`,
-          content: btoa(JSON.stringify(content, null, 2)),
-          sha: sha
-        },
-        { headers: { Authorization: `token ${TOKEN}` } }
-      );
-    } catch (error) {
-      console.error(`Failed to update ${filePath}:`, error.response || error);
-    }
-  };
-
   return (
-    <div>
+    <div className="admin-dashboard">
       <h2>Admin Dashboard</h2>
       <h3>Pending Approvals</h3>
-      {pendingList.length > 0 ? (
+
+      {loading ? (
+        <p>Loading pending approvals...</p>
+      ) : pendingList.length > 0 ? (
         <ul>
           {pendingList.map((user, index) => (
             <li key={index}>
@@ -115,7 +120,7 @@ const AdminDashboard = () => {
 
       {/* 팝업 창 */}
       {selectedUser && (
-        <div className="popup">
+        <div className="popup-overlay">
           <div className="popup-content">
             <h3>Membership Request Details</h3>
             <p><strong>Username:</strong> {selectedUser.username}</p>
@@ -123,7 +128,7 @@ const AdminDashboard = () => {
             <p><strong>Phone:</strong> {selectedUser.phone}</p>
             <button onClick={() => approveUser(selectedUser)}>Approve</button>
             <button onClick={() => rejectUser(selectedUser.username)}>Reject</button>
-            <button onClick={() => setSelectedUser(null)}>Close</button>
+            <button className="close-btn" onClick={() => setSelectedUser(null)}>Close</button>
           </div>
         </div>
       )}
