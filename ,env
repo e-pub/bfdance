@@ -1,0 +1,6 @@
+GENERATE_SOURCEMAP=false  # Sourcemap 생성 비활성화 (코드 노출 방지)
+
+# AWS 설정 (보안 정보는 여기에 저장)
+REACT_APP_AWS_REGION=ap-northeast-2
+REACT_APP_AWS_ACCESS_KEY=YOUR_ACCESS_KEY
+REACT_APP_AWS_SECRET_KEY=YOUR_SECRET_KEY

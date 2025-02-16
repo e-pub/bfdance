@@ -1,16 +1,24 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const AdminLogin = ({ setIsAdmin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
-  const handleLogin = () => {
-    if (username === "admin" && password === "password123") {
-      setIsAdmin(true);
-      localStorage.setItem("isAdmin", "true");
-      alert("Logged in as Admin!");
-    } else {
-      alert("Invalid username or password!");
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post("https://your-lambda-api-url/admin-login", {
+        username,
+        password,
+      });
+      if (response.status === 200) {
+        setIsAdmin(true);
+        localStorage.setItem("isAdmin", "true");
+        alert("Logged in successfully!");
+      }
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Invalid username or password!");
     }
   };
 
@@ -30,6 +38,7 @@ const AdminLogin = ({ setIsAdmin }) => {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button onClick={handleLogin}>Login</button>
+      {message && <p>{message}</p>}
     </div>
   );
 };

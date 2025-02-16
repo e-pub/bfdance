@@ -1,11 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios"; 
+import axios from "axios";
 import "Assets/css/style-custom-25.css"; 
-
-const GITHUB_API_BASE = "https://api.github.com/repos";
-const GITHUB_REPO = "my-username/my-repo";  // 실제 GitHub 저장소 경로로 변경 (예: "john-doe/my-awesome-project")
-const TOKEN = "ghp_xxxxxxx";  // GitHub Personal Access Token
-
 
 const MembershipRequest = ({ closePopup }) => {
   const [formData, setFormData] = useState({
@@ -24,8 +19,8 @@ const MembershipRequest = ({ closePopup }) => {
 
   const handleValidation = () => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phonePattern = /^(\d{3})-(\d{3,4})-(\d{4})$/;  // 010-XXX-XXXX 또는 010-XXXX-XXXX 형식 지원
-  
+    const phonePattern = /^(\d{3})-(\d{3,4})-(\d{4})$/;
+
     if (!formData.username) {
       alert("Username is required.");
       return false;
@@ -40,34 +35,15 @@ const MembershipRequest = ({ closePopup }) => {
     }
     return true;
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!handleValidation()) return;
 
     setIsSubmitting(true);
 
     try {
-      const response = await axios.get(
-        `${GITHUB_API_BASE}/${GITHUB_REPO}/contents/data/pendingList.json`,
-        { headers: { Authorization: `token ${TOKEN}` } }
-      );
-
-      const pendingList = JSON.parse(atob(response.data.content));
-      pendingList.push(formData);
-
-      await axios.put(
-        `${GITHUB_API_BASE}/${GITHUB_REPO}/contents/data/pendingList.json`,
-        {
-          message: "Add new pending request",
-          content: btoa(JSON.stringify(pendingList, null, 2)),
-          sha: response.data.sha,
-        },
-        { headers: { Authorization: `token ${TOKEN}` } }
-      );
-
+      await axios.post("https://your-lambda-api-url/membership-request", formData);
       alert("Your membership request has been submitted!");
       setFormData({ username: "", email: "", phone: "", role: "admin" });
     } catch (error) {

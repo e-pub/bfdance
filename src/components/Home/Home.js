@@ -1,14 +1,13 @@
+import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import homeLogo from "../../Assets/home-main.svg";
 import Particle from "../Particle";
 import Home2 from "./Home2";
 import Type from "./Type";
-import Calendar from "../modules/calendar";  // 새로 만든 React Calendar 컴포넌트
-import "../../Assets/css/calendar.css"; // 캘린더 스타일
+import DirectUploadCalendar from "../modules/calendar/DirectUploadCalendar";
+import InstagramCalendar from "../modules/calendar/InstagramCalendar";
 
 function Home() {
-  const isAdmin = true; // 관리자 여부 설정
-
   return (
     <section>
       <Container fluid className="home-section" id="home">
@@ -22,36 +21,35 @@ function Home() {
                   👋🏻
                 </span>
               </h1>
-
               <h1 className="heading-name">
-                I'M
-                <strong className="main-name"> SOUMYAJIT BEHERA</strong>
+                I'M <strong className="main-name"> SOUMYAJIT BEHERA</strong>
               </h1>
-
               <div style={{ padding: 50, textAlign: "left" }}>
                 <Type />
               </div>
             </Col>
-
             <Col md={5} style={{ paddingBottom: 20 }}>
-              <img
-                src={homeLogo}
-                alt="home pic"
-                className="img-fluid"
-                style={{ maxHeight: "450px" }}
-              />
+              <img src={homeLogo} alt="home pic" className="img-fluid" style={{ maxHeight: "450px" }} />
             </Col>
           </Row>
-
-          {/* 캘린더 추가 부분 */}
-          
         </Container>
       </Container>
-      <Row>
-        <Col md={12}>
-          <Calendar isAdmin={isAdmin} />  {/* Calendar 컴포넌트를 여기에 삽입 */}
-        </Col>
-      </Row>
+
+      <Container fluid className="calendar-section">
+        <Row>
+          <Col md={12}>
+            <h2 className="calendar-heading">Direct Upload Calendar</h2>
+            <DirectUploadCalendar />
+          </Col>
+        </Row>
+        <Row>
+          <Col md={12}>
+            <h2 className="calendar-heading">Instagram Calendar</h2>
+            <InstagramCalendar />
+          </Col>
+        </Row>
+      </Container>
+
       <Home2 />
     </section>
   );

@@ -6,41 +6,42 @@ import About from "./components/About/About";
 import Projects from "./components/Projects/Projects";
 import Footer from "./components/Footer";
 import Resume from "./components/Resume/ResumeNew";
-import MembershipRequest from "./components/modules/admin/MembershipRequest";
-import AdminLogin from "./components/modules/admin/AdminLogin";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate
-} from "react-router-dom";
+import AdminAuthPopup from "./components/modules/admin/AdminAuthPopup";
+import MembershipForm from "./components/modules/membership/MembershipForm";
+import MemberBoard from "./components/modules/membership/MemberBoard";
+import DirectUploadCalendar from "./components/modules/calendar/DirectUploadCalendar";
+import InstagramCalendar from "./components/modules/calendar/InstagramCalendar";
+
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import "./style.css";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
-  const [load, updateLoad] = useState(true);
+  const [load, setLoad] = useState(true);
   const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem("isAdmin") === "true");
-  const [showLoginPopup, setShowLoginPopup] = useState(false);
-  const [showMembershipPopup, setShowMembershipPopup] = useState(false);
+  const [isMember, setIsMember] = useState(() => localStorage.getItem("isMember") === "true");
+  const [popupType, setPopupType] = useState(""); // "admin" or "membership"
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      updateLoad(false);
-    }, 1200);
+    const timer = setTimeout(() => setLoad(false), 1200);
     return () => clearTimeout(timer);
   }, []);
+
+  const closePopup = () => setPopupType("");
 
   return (
     <Router>
       <Preloader load={load} />
-      <div className="App" id={load ? "no-scroll" : "scroll"}>
+      <div className={`App ${load ? "no-scroll" : "scroll"}`}>
         <Navbar
           isAdmin={isAdmin}
           setIsAdmin={setIsAdmin}
-          onShowLogin={() => setShowLoginPopup(true)}
-          onShowMembership={() => setShowMembershipPopup(true)}
+          isMember={isMember}
+          setIsMember={setIsMember}
+          onShowAdminPopup={() => setPopupType("admin")}
+          onShowMembershipPopup={() => setPopupType("membership")}
         />
         <ScrollToTop />
         <Routes>
@@ -48,26 +49,42 @@ function App() {
           <Route path="/project" element={<Projects />} />
           <Route path="/about" element={<About />} />
           <Route path="/resume" element={<Resume />} />
+          <Route
+            path="/member-board"
+            element={
+              isMember ? (
+                <MemberBoard />
+              ) : (
+                <p style={{ textAlign: "center", marginTop: "50px" }}>Please login to access the member board.</p>
+              )
+            }
+          />
+          <Route path="/direct-upload-calendar" element={<DirectUploadCalendar isAdmin={isAdmin} />} />
+          <Route path="/instagram-calendar" element={<InstagramCalendar />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         <Footer />
 
-        {/* Login Popup */}
-        {showLoginPopup && (
+        {/* Admin 인증 팝업 */}
+        {popupType === "admin" && (
           <div className="popup-overlay">
             <div className="popup-content">
-              <button className="close-btn" onClick={() => setShowLoginPopup(false)}>X</button>
-              <AdminLogin setIsAdmin={setIsAdmin} closePopup={() => setShowLoginPopup(false)} />
+              <button className="close-btn" onClick={closePopup}>
+                X
+              </button>
+              <AdminAuthPopup setIsAdmin={setIsAdmin} closePopup={closePopup} />
             </div>
           </div>
         )}
 
-        {/* Membership Request Popup */}
-        {showMembershipPopup && (
+        {/* Membership 등록 팝업 */}
+        {popupType === "membership" && (
           <div className="popup-overlay">
             <div className="popup-content">
-              <button className="close-btn" onClick={() => setShowMembershipPopup(false)}>X</button>
-              <MembershipRequest closePopup={() => setShowMembershipPopup(false)} />
+              <button className="close-btn" onClick={closePopup}>
+                X
+              </button>
+              <MembershipForm closePopup={closePopup} />
             </div>
           </div>
         )}
