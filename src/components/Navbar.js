@@ -1,10 +1,12 @@
+// 기존 소스 복원 및 개선
+
 import React, { useState, useEffect } from "react";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import Container from "react-bootstrap/Container";
 import logo from "Assets/logo.png";
 import { Link } from "react-router-dom";
-import "Assets/css/style-custom-25.css"; // 스타일 정의
+import "Assets/css/style-custom-25.css";
 
 function NavBar({ isAdmin, isMember, setIsAdmin, setIsMember, onShowAdminPopup, onShowMembershipPopup }) {
   const [expand, updateExpanded] = useState(false);
