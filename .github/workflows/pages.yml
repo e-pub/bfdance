@@ -3,7 +3,12 @@ name: Deploy GitHub Pages
 on:
   push:
     branches:
-      - main  # main 브랜치에 push하면 자동 배포
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   deploy:
@@ -11,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false  # ✅ 코드 보호
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -23,8 +30,10 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Deploy to GitHub Pages
+      - name: Upload artifact for deployment
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./build  # 🚀 배포할 폴더 지정
 
-      - name: Publish site
+      - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
