@@ -12,7 +12,7 @@ import MemberBoard from "./components/modules/membership/MemberBoard";
 import DirectUploadCalendar from "./components/modules/calendar/DirectUploadCalendar";
 import InstagramCalendar from "./components/modules/calendar/InstagramCalendar";
 
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { HashRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./context/AuthContext"; // AuthContext 추가
 import "./style.css";
