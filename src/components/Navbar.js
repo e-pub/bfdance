@@ -1,16 +1,17 @@
-// 기존 소스 복원 및 개선
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import Container from "react-bootstrap/Container";
 import logo from "Assets/logo.png";
 import { Link } from "react-router-dom";
 import "Assets/css/style-custom-25.css";
+import axios from "axios";
+import AuthContext from "../context/AuthContext"; // ✅ default import
 
-function NavBar({ isAdmin, isMember, setIsAdmin, setIsMember, onShowAdminPopup, onShowMembershipPopup }) {
+function NavBar({ onShowAdminPopup, onShowMembershipPopup }) {
   const [expand, updateExpanded] = useState(false);
   const [navColour, updateNavbar] = useState(false);
+  const { isAdmin, isMember, setIsAdmin, setIsMember } = useContext(AuthContext);
 
   useEffect(() => {
     function scrollHandler() {
@@ -20,12 +21,16 @@ function NavBar({ isAdmin, isMember, setIsAdmin, setIsMember, onShowAdminPopup, 
     return () => window.removeEventListener("scroll", scrollHandler);
   }, []);
 
-  const handleLogout = () => {
-    setIsAdmin(false);
-    setIsMember(false);
-    localStorage.removeItem("isAdmin");
-    localStorage.removeItem("isMember");
-    alert("You have logged out.");
+  const handleLogout = async () => {
+    try {
+      await axios.post("https://your-lambda-api-url/logout", {}, { withCredentials: true });
+      setIsAdmin(false);
+      setIsMember(false);
+      alert("You have logged out.");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      alert("An error occurred while logging out.");
+    }
   };
 
   return (
@@ -63,33 +68,10 @@ function NavBar({ isAdmin, isMember, setIsAdmin, setIsMember, onShowAdminPopup, 
                   <Nav.Link onClick={onShowMembershipPopup}>Membership</Nav.Link>
                 </Nav.Item>
               </>
-            ) : isAdmin ? (
-              <>
-                <Nav.Item>
-                  <Nav.Link as={Link} to="/calendar-management">Calendar Management</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link as={Link} to="/member-board">Member Board</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link as={Link} to="/profile-settings">Profile Settings</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
-                </Nav.Item>
-              </>
             ) : (
-              <>
-                <Nav.Item>
-                  <Nav.Link as={Link} to="/member-board">Member Board</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link as={Link} to="/profile-settings">Profile Settings</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
-                </Nav.Item>
-              </>
+              <Nav.Item>
+                <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+              </Nav.Item>
             )}
           </Nav>
         </Navbar.Collapse>
