@@ -1,0 +1,14 @@
+[
+  {
+    "username": "admin",
+    "email": "tecarto@naver.com",
+    "phone": "010-5167-0958",
+    "role": "Admin"
+  },
+  {
+    "username": "user",
+    "email": "user@example.com",
+    "phone": "123-456-7890",
+    "role": "User"
+  }
+]
